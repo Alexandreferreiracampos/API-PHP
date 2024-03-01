@@ -15,7 +15,7 @@ function generateJWT($userId, $username)
         "username" => $username,
         "exp" => time() + (60 * 60) // Token expira em 1 hora
     );
-    $key = "your_secret_key"; // Chave secreta
+    $key = "J1c2VyX2lkIjoiMjkiLCJ1c2VybmFtZ"; // Chave secreta
     $alg = "HS256"; // Algoritmo de assinatura JWT
     return JWT::encode($payload, $key, $alg); // Substitua "your_secret_key" pela sua chave secreta real
 }
@@ -28,11 +28,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $_SERVER["CONTENT_TYPE"] === "applic
     $data = json_decode($json_data);
 
     // Verifique se os dados esperados estão presentes
-    if (isset($data->username) && isset($data->password) && isset($data->phone)) {
+    if (isset($data->username) && isset($data->password) && isset($data->phone) && isset($data->email)) {
         // Obtenha os dados do usuário
         $username = $data->username;
         $password = $data->password;
         $phone = $data->phone;
+        $email = $data->email;
 
         // Hash da senha (você pode usar algoritmos mais seguros, como bcrypt)
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
@@ -46,10 +47,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $_SERVER["CONTENT_TYPE"] === "applic
             echo "Usuario ja existente";
         } else {
              // Insira os dados do usuário no banco de dados
-        $stmt = $link->prepare("INSERT INTO users (nome, senha, telefone) VALUES (?, ?, ?)");
+        $stmt = $link->prepare("INSERT INTO users (nome, senha, telefone, email) VALUES (?, ?, ?, ?)");
         $stmt->bindValue(1, $username, PDO::PARAM_STR);
         $stmt->bindValue(2, $hashedPassword, PDO::PARAM_STR);
         $stmt->bindValue(3, $phone, PDO::PARAM_STR);
+        $stmt->bindValue(4, $email, PDO::PARAM_STR);
         $stmt->execute();
 
         // Obtenha o ID do usuário recém-criado
