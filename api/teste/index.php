@@ -1,24 +1,27 @@
-<?php
+if (isset($headers['Authorization'])) {
+        $authorizationHeader = $headers['Authorization'];
+        $tokenParts = explode(" ", $authorizationHeader);
+        $token = isset($tokenParts[1]) ? $tokenParts[1] : null;
+    }
 
-function generateUserToken($userId, $secretKey) {
-    // Cria um timestamp para evitar reutilização de tokens
-    $timestamp = time();
+    if (!$token) {
+        http_response_code(401);
+        exit("Token JWT não fornecido.");
+    }
 
-    // Concatena o ID do usuário e o timestamp
-    $data = $userId . '|' . $timestamp;
+    // Chave secreta usada para assinar o token JWT
+    $secretKey = "J1c2VyX2lkIjoiMjkiLCJ1c2VybmFtZ";
+    $alg = "HS256";
 
-    // Gera o token usando HMAC e SHA256
-    $token = hash_hmac('sha256', $data, $secretKey);
+    try {
+        $headersObject = array_to_object($headers);
+        // Decodificar o token JWT
+        $tokenDecodificado = JWT::decode($token, new Key($secretKey, $alg));
 
-    // Retorna o token
-    return $token;
-}
-
-// Exemplo de uso
-$userId = 123;
-$secretKey = 'sua_chave_secreta';
-
-$userToken = generateUserToken($userId, $secretKey);
-echo "Token do usuário: " . $userToken;
-
-?>
+        // Se o token JWT for válido, imprima o payload decodificado
+        print_r($tokenDecodificado);
+    } catch (Exception $e) {
+        // Se houver algum erro ao decodificar o token, retorne um erro
+        http_response_code(401);
+        exit("Erro ao decodificar o token JWT: " . $e->getMessage());
+    }
