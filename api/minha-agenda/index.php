@@ -1,5 +1,20 @@
 <?php
 
+// Permitir solicitações de qualquer origem
+header("Access-Control-Allow-Origin: *");
+
+// Permitir métodos de solicitação GET, POST e OPTIONS
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+
+// Permitir os cabeçalhos de solicitação Authorization e Content-Type
+header("Access-Control-Allow-Headers: Authorization, Content-Type");
+
+// Permitir credenciais de usuário em solicitações
+header("Access-Control-Allow-Credentials: true");
+
+// Definir o tipo de conteúdo para aplicativo/json
+header("Content-Type: application/json");
+
 require_once("../../class/database.class.php");
 require_once("../../function/validar-token.php");
 
@@ -11,15 +26,18 @@ $linkId = $con->getConexao();
 $token = null;
 $headers = getallheaders();
 
-if (isset($headers['Authorization'])) {
-    $authorizationHeader = $headers['Authorization'];
-    $tokenParts = explode(" ", $authorizationHeader);
-    $token = isset($tokenParts[1]) ? $tokenParts[1] : null;
+if (!isset($_SERVER['HTTP_AUTHORIZATION'])) {
+    http_response_code(401);
+    exit(json_encode(array("message" => "Token de autorização não fornecido")));
 }
+
+$authorizationHeader = $_SERVER['HTTP_AUTHORIZATION'];
+$tokenParts = explode(" ", $authorizationHeader);
+$token = isset($tokenParts[1]) ? $tokenParts[1] : null;
 
 if (!$token) {
     http_response_code(401);
-    exit("Token JWT não fornecido.");
+    exit(json_encode(array("message" => "Token de autorização inválido")));
 }
 
 $validarToken = token($headers, $token);
@@ -38,6 +56,7 @@ if ($validarToken !== null) {
     agenda.dia,
     agenda.hora,
     agenda.date,
+    agenda.status,
     s.id AS id_servico,
     s.nome AS nome_servico,
     e.id AS id_empresas,
@@ -71,7 +90,8 @@ if ($validarToken !== null) {
                 'nome_servico' => $row['nome_servico'],
                 'id_servico' => $row['id_servico'],
                 'id_empresas' => $row['id_empresas'],
-                'nome_empresa' => $row['nome_empresa']
+                'nome_empresa' => $row['nome_empresa'],
+                'status'=> $row['status']
                
             );
             $agendamentos[] = $agendamento;

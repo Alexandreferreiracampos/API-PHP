@@ -34,7 +34,9 @@ function array_to_object($array)
     } catch (Exception $e) {
         // Se houver algum erro ao decodificar o token, retorne um erro
         http_response_code(401);
-        exit("Erro ao decodificar o token JWT: " . $e->getMessage());
+        header('Content-Type: application/json');
+        echo json_encode(array("message" => $e->getMessage()));
+        
     }
  }
 

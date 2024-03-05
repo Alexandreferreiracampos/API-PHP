@@ -1,27 +1,23 @@
-if (isset($headers['Authorization'])) {
-        $authorizationHeader = $headers['Authorization'];
-        $tokenParts = explode(" ", $authorizationHeader);
-        $token = isset($tokenParts[1]) ? $tokenParts[1] : null;
-    }
+<?php
 
-    if (!$token) {
-        http_response_code(401);
-        exit("Token JWT não fornecido.");
-    }
+// Verifica se o token foi enviado nos cabeçalhos
+if (!isset($_SERVER['HTTP_AUTHORIZATION'])) {
+    http_response_code(401);
+    exit(json_encode(array("message" => "Token de autorização não fornecido")));
+}
 
-    // Chave secreta usada para assinar o token JWT
-    $secretKey = "J1c2VyX2lkIjoiMjkiLCJ1c2VybmFtZ";
-    $alg = "HS256";
+// Obtém o token dos cabeçalhos
+$authorizationHeader = $_SERVER['HTTP_AUTHORIZATION'];
+$tokenParts = explode(" ", $authorizationHeader);
+$token = isset($tokenParts[1]) ? $tokenParts[1] : null;
 
-    try {
-        $headersObject = array_to_object($headers);
-        // Decodificar o token JWT
-        $tokenDecodificado = JWT::decode($token, new Key($secretKey, $alg));
+// Verifica se o token está presente
+if (!$token) {
+    http_response_code(401);
+    exit(json_encode(array("message" => "Token de autorização inválido")));
+}
 
-        // Se o token JWT for válido, imprima o payload decodificado
-        print_r($tokenDecodificado);
-    } catch (Exception $e) {
-        // Se houver algum erro ao decodificar o token, retorne um erro
-        http_response_code(401);
-        exit("Erro ao decodificar o token JWT: " . $e->getMessage());
-    }
+// resposta da API
+http_response_code(200);
+echo json_encode(array("message" => $token));
+
