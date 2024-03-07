@@ -48,7 +48,42 @@ if ($validarToken !== null) {
 
     $id = $validarToken->user_id;
 
-    if (isset($_GET['id'])) {
+    
+    if (isset($_GET['categoria']) && isset($_GET['id'])) {
+
+        $categoria = $_GET['categoria'];
+        $id_empresa = $_GET['id'];
+
+        $query = 'SELECT * FROM servicos WHERE catservico = :categoria AND id_empresa = :id_empresa';
+        $stmt = $link->prepare($query);
+        $stmt->bindParam(':categoria', $categoria);
+        $stmt->bindParam(':id_empresa', $id_empresa);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+
+            
+            while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+                $empresa = array(
+                    'id' => $row['id'],
+                     'nome' => $row['nome'],
+                     'preco' => $row['preco'],
+                     'tempo_do_servico' => $row['tempo_do_servico'],
+                     'catservico' => $row['catservico'],
+                     'id_empresa'=> $row['id_empresa'],
+                );
+                $empresaArray[] = $empresa;
+            }
+
+            header('Content-Type: application/json');
+            echo json_encode($empresaArray);
+
+        } else {
+            header('Content-Type: application/json');
+            echo json_encode(array("message" => "Nenhum seerviço cadastrado para essa empresa."));
+        }
+
+    } else if (isset($_GET['id'])) {
 
         $id_empresa = $_GET['id'];
 
@@ -62,6 +97,7 @@ if ($validarToken !== null) {
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $serviceEmpresa = array(
                     'id' => $row['id'],
+                    'id_Empresa' => $id_empresa,
                     'catservico' => $row['catservico'],
                 );
                 $empresaArray[] = $serviceEmpresa;
@@ -71,41 +107,37 @@ if ($validarToken !== null) {
             echo json_encode($empresaArray);
         } else {
             header('Content-Type: application/json');
-            echo json_encode(array("message" => "Empresa não encontrada."));
+            echo json_encode(array("message" => "Nenhum seerviço cadastrado para essa empresa."));
         }
-    }
+    } else if (isset($_GET['id-servico'])){
 
-    if (isset($_GET['categoria']) && isset($_GET['id'])) {
+        $id_servico = $_GET['id-servico'];
 
-        $categoria = $_GET['categoria'];
-        $id_empresa = $_GET['id'];
-
-        $query = 'SELECT * FROM servicos WHERE catservico = :categoria AND id_empresa = :id_empresa';
+        $query = 'SELECT funcionario.id, funcionario.nome
+        FROM funcionario
+        INNER JOIN funcionario_servico ON funcionario.id = funcionario_servico.id_funcionario
+        WHERE funcionario_servico.id_servico = :id_funcionario';
         $stmt = $link->prepare($query);
-        $stmt->bindParam(':categoria', $categoria);
-        $stmt->bindParam(':categoria', $id_empresa);
+        $stmt->bindParam(':id_funcionario', $id_servico);
         $stmt->execute();
 
         if ($stmt->rowCount() > 0) {
+               
+              while ($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+                $array = array(
+                    'id'=> $row['id'],
+                    'nome'=> $row['nome']
+                );
+                $funcionario[] = $array;
+              }
+              header('Content-Type: application/json');
+              echo json_encode($funcionario);
 
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            $empresa = array(
-                'id' => $row['id']
-            );
-
-            $empresaArray[] = $empresa;
-            header('Content-Type: application/json');
-            echo json_encode($empresaArray);
-        } else {
-            header('Content-Type: application/json');
-            echo json_encode(array("message" => "Empresa não encontrada."));
+        }else{
+            http_response_code(401);
+            exit(json_encode(array("message" => "Nenhuma funcionario encontrado.")));
         }
-
-
-
-        echo $categoria;
-
     }
+
 
 }
