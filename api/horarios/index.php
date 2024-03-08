@@ -54,7 +54,6 @@ if ($validarToken !== null) {
         $data = json_decode($json_data);
     
         $dataAgenda = $data->data;
-        $duração = $data->duração;
         $id_funcionario = $data->id_funcionario;
     
         $query = 'SELECT inicio_expediente, fim_expediente, inicio_almoco, fim_almoco

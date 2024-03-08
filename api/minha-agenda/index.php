@@ -50,25 +50,26 @@ if ($validarToken !== null) {
 
     $query = "SELECT 
     agenda.id AS id_agenda,
-    agenda.service_name,
-    agenda.catSlug,
-    agenda.mes,
-    agenda.dia,
-    agenda.hora,
-    agenda.date,
-    agenda.status,
-    s.id AS id_servico,
+    agenda.data_agendamento,
+    agenda.horario,
     s.nome AS nome_servico,
-    e.id AS id_empresas,
-    e.nome AS nome_empresa
-    FROM 
-    minha_agenda agenda
-    INNER JOIN 
-    servicos s ON agenda.id_servico = s.id
-    INNER JOIN 
-    empresas e ON agenda.id_empresa = e.id
-    WHERE 
-    agenda.id_usuario = :usuario LIMIT 100";
+    f.nome AS nome_funcionario,
+    e.nome AS nome_empresa,
+    agenda.status
+FROM 
+    agendamentos AS agenda
+INNER JOIN 
+    servicos AS s ON agenda.id_servico = s.id
+INNER JOIN 
+    funcionario AS f ON agenda.id_funcionario = f.id
+INNER JOIN
+    empresas AS e ON f.id_empresa = e.id
+WHERE 
+    agenda.id_cliente = :usuario 
+ORDER BY 
+    agenda.data_agendamento ASC,
+    agenda.horario ASC
+LIMIT 100";
     $stmt = $link->prepare($query);
     $stmt->bindParam(':usuario', $id);
     $stmt->execute();
@@ -78,21 +79,16 @@ if ($validarToken !== null) {
         $agendamento = array();
 
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-
+            $tempo = $row['horario'];
+            $tempoSemZeros = substr($tempo, 0, -3); 
             $agendamento = array(
-                'id' => $row['id_agenda'],
-                'service_name' => $row['service_name'],
-                'catSlug' => $row['catSlug'],
-                'mes' => $row['mes'],
-                'dia' => $row['dia'],
-                'date' => $row['date'],
-                'hora' => $row['hora'],
+                'id_agenda' => $row['id_agenda'],
+                'nome_funcionario' => $row['nome_funcionario'],
                 'nome_servico' => $row['nome_servico'],
-                'id_servico' => $row['id_servico'],
-                'id_empresas' => $row['id_empresas'],
                 'nome_empresa' => $row['nome_empresa'],
-                'status'=> $row['status']
-               
+                'horario'=> $tempoSemZeros,
+                'data'=> $row['data_agendamento'],
+                'status' => $row['status']
             );
             $agendamentos[] = $agendamento;
         }
