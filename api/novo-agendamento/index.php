@@ -58,6 +58,7 @@ if ($validarToken !== null) {
         $data_agendamento = date('Y-m-d', strtotime($data->data_agendamento));
         $horario = $data->horario;
         $duracao_servico = $data->duracao_servico;
+        $id_empresa = $data->id_empresa;
 
         $queryVerificacao = "SELECT COUNT(*) AS total FROM agendamentos WHERE id_funcionario = :id_funcionario  AND data_agendamento = :data_agendamento AND horario = :horario";
         $stmtVerificacao = $link->prepare($queryVerificacao);
@@ -72,7 +73,7 @@ if ($validarToken !== null) {
             http_response_code(400);
             echo json_encode(array("message" => "Já existe um agendamento para esse horario."));
         } else {
-            $query = "INSERT INTO agendamentos (id_funcionario, id_cliente, id_servico, data_agendamento, horario, duracao_servico) VALUES (:id_funcionario, :id_cliente, :id_servico, :data_agendamento, :horario, :duracao_servico)";
+            $query = "INSERT INTO agendamentos (id_funcionario, id_cliente, id_servico, data_agendamento, horario, duracao_servico, id_empresa) VALUES (:id_funcionario, :id_cliente, :id_servico, :data_agendamento, :horario, :duracao_servico, :id_empresa)";
             $stmt = $link->prepare($query);
     
             // Bind dos parâmetros
@@ -82,6 +83,7 @@ if ($validarToken !== null) {
             $stmt->bindParam(':data_agendamento', $data_agendamento);
             $stmt->bindParam(':horario', $horario);
             $stmt->bindParam(':duracao_servico', $duracao_servico);
+            $stmt->bindParam(':id_empresa', $id_empresa);
     
             // Execução da query
             if ($stmt->execute()) {

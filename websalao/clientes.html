@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>DevExtreme ScrollView Example</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/21.2.5/css/dx.common.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/21.2.5/css/dx.light.css" />
+    <script src="https://cdn3.devexpress.com/jslib/21.2.5/js/dx.all.js"></script>
+</head>
+<body>
+    <div id="scrollView" style="height: 300px;"></div>
+<h1>ooasd</h1>
+    <script>
+        var scrollView = new DevExpress.ui.dxScrollView("#scrollView", {
+            direction: "vertical",
+            showScrollbar: "always",
+            useNative: false // Desativa o uso do scroll nativo do dispositivo
+        });
+
+        var content = "";
+        for (var i = 1; i <= 20; i++) {
+            content += "<div style='padding: 10px;'>Appointment " + i + "</div>";
+        }
+
+        // Adiciona o conteúdo diretamente ao ScrollView usando innerHTML
+        document.getElementById("scrollView").innerHTML = content;
+    </script>
+</body>
+</html>
